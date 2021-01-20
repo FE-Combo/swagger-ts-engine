@@ -1,0 +1,21 @@
+{
+  "name": "swagger-ts-engine",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "api": "node src/test.js"
+  },
+  "author": "vocoWone",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^14.14.22"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "chalk": "^4.1.0",
+    "fs-extra": "^9.1.0",
+    "prettier": "^2.2.1"
+  }
+}
