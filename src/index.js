@@ -1,6 +1,6 @@
 const path = require("path");
-const chalk = require("chalk");
 const fs = require("fs-extra");
+const chalk = require("chalk");
 const axios = require("axios");
 const Agent = require("https").Agent;
 
@@ -17,8 +17,20 @@ function initialUpperCase(str){
     });
 }
 
-function checkType(code,properties,hiddenCode){
-    const prefix = hiddenCode?"":`${code}:`
+function defaultValue(type,value){
+    if(value){
+        switch (type) {
+            case "string":
+                return `="${value}"`
+            case "array":
+                return `=["${value}"]`
+        }
+    }
+   return ""
+}
+
+function checkType(properties,code){
+    const prefix = code?`${code}${properties.required?"":"?"}:`:""
     if(properties.type){
         switch (properties.type) {
             case "boolean":
@@ -27,19 +39,28 @@ function checkType(code,properties,hiddenCode){
                 return `${prefix}number`;
             case "string":
                 return `${prefix}${properties.enum ? properties.enum.map(_=>`"${_}"`).join("|"):"string"}`;
+            case "file":
+                return `${prefix}File`
             case "array":
-                return `${properties.items.$ref ? prefix+"Array<"+properties.items.$ref.replace("#/definitions/","")+">":prefix+"Array<"+checkType(code,properties.items,true)+">"} ` 
+                return `${properties.items.$ref ? prefix+"Array<"+properties.items.$ref.replace("#/definitions/","")+">":prefix+"Array<"+checkType(properties.items)+">"}` 
             case "object":
-                return `
+                return properties.properties?`
 export interface ${code} {
 ${Object.keys(properties.properties).map(filed=>{
-    return checkType(filed,properties.properties[filed])
+    return checkType(properties.properties[filed],filed)
 }).join("\n")}
-}`  
+}`:`${properties.additionalProperties?"{[key:string]:"+checkType(properties.additionalProperties)+"}":""}`     
         }
     } else if(properties.$ref){
-        return `${code}: ${properties.$ref.replace("#/definitions/","")}`
+        return `${prefix}${properties.$ref.replace("#/definitions/","")}`
+    } else if(properties.schema){
+        if(properties.schema.$ref){
+            return `${prefix}${properties.schema.$ref.replace("#/definitions/","")}`
+        } else {
+            return checkType(properties.schema,code)
+        }
     }
+    console.info(chalk`{red.bold CheckType Omission: ${JSON.stringify(properties)}}`)
     return "";
 }
 
@@ -54,15 +75,37 @@ function createApiStructure(paths){
             if(!preInfo[tag]){
                 preInfo[tag] = [];
             }
+
+            const parameters = currentMethodApi.parameters.reduce((preValue,currentParameter)=>{
+                preValue.push({
+                    in:currentParameter.in,
+                    key: currentParameter.name,
+                    type: currentParameter.type,
+                    minimum: currentParameter.minimum,
+                    required: currentParameter.required,
+                    default: currentParameter.items && currentParameter.items.default,
+                    keyWithType: checkType(currentParameter,currentParameter.name)
+                })
+                return preValue
+            },[])
+            const bodyInfo = parameters.find(_=>_.in==="body")
+            const queryInfo = parameters.find(_=>_.in==="query")
+            const pathInfo = parameters.find(_=>_.in==="path")
+            const headerInfo = parameters.find(_=>_.in==="header")
+            const formDataInfo = parameters.find(_=>_.in==="formData")
+            const response = currentMethodApi.responses && currentMethodApi.responses[200]
             preInfo[tag].push({
                 name: currentMethodApi.operationId,
                 summary:currentMethodApi.summary,
                 tags:currentMethodApi.tags,
                 api,
                 method,
-                body:{},
-                query:{},
-                pathParams:{},
+                body:bodyInfo,
+                query:queryInfo,
+                path:pathInfo,
+                header:headerInfo,
+                formData:formDataInfo,
+                responseType: response&&response.schema? checkType(response.schema):"void"
             })
             return preInfo
         },preValue)
@@ -71,12 +114,13 @@ function createApiStructure(paths){
     return result;
 }
 
-function generateApiContent(paths,tagsInfo, generatePath){
+function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImportExpression){
     const apis = createApiStructure(paths);
     const tags = Object.keys(apis)
     tags.forEach(tag=>{
         const lines = [];
-        lines.push(`import { request } from 'umi';`);
+        lines.push(`import {${typeNames.join(",")}} from "./type.ts";`)
+        lines.push(requestImportExpression);
         lines.push(``);
         const serviceName = `${initialUpperCase(tag)}Service`
         const tagInfo = tagsInfo.find(_=>_&&_.name===tag)
@@ -89,8 +133,14 @@ function generateApiContent(paths,tagsInfo, generatePath){
             if(apiInfo.summary){
                 lines.push(`// ${apiInfo.summary}`);
             }
-            lines.push(`public static ${apiInfo.name}(): Promise<void> {`)
-            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}", {}, {}, {});`)
+            const filterKey = ["path", "query", "body", "header","formData"];
+            const requestKey =  filterKey.reduce((preValue,key)=>{
+
+                preValue.push(apiInfo[key]||null)
+                return preValue
+            },[]);
+            lines.push(`public static ${apiInfo.name}(${requestKey.filter(_=>_).map(_=>`${_.keyWithType}${defaultValue(_.type,_.default)}`)}): Promise<${apiInfo.responseType}> {`)
+            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}",${requestKey.map(_=>_?_.key:"null").join(",")});`)
             lines.push(`}`);
         });
         lines.push(`}`);
@@ -101,12 +151,13 @@ function generateApiContent(paths,tagsInfo, generatePath){
     })
 }
 
-function generateTypeContent(definitions,generatePath){
+function generateTypeContent(definitions,generatePath,typeNames){
     const lines = [];
     const types = Object.keys(definitions)
     types.forEach(type=>{
+        typeNames.push(type)
         const definition = definitions[type];
-        lines.push(checkType(type,definition))
+        lines.push(checkType(definition,type))
     })
     const targetPath = path.join(generatePath,`type.ts`)
     fs.ensureFileSync(targetPath);
@@ -117,14 +168,24 @@ function generateTypeContent(definitions,generatePath){
 
 async function generate(options) {
     try {
-        const url = "https://petstore.swagger.io/v2/swagger.json";
-        const generatePath = path.join(process.cwd(),"/services/api");
+        const {serverUrl,servicePath,requestImportExpression} = options
+        if(!serverUrl) {
+            throw new Error('Missing [serverUrl]');
+        }
+        if(!servicePath) {
+            throw new Error('Missing [servicePath]');
+        }
+        if(!requestImportExpression){
+            throw new Error('Missing [requestImportExpression]');
+        }
+        const generatePath = path.join(process.cwd(),servicePath);
         console.info(chalk`{white.green Clear directory:} ${generatePath}`);
         fs.emptyDirSync(generatePath);
         
-        const content = await getContent(url);
-        generateTypeContent(content.definitions,generatePath);
-        generateApiContent(content.paths, content.tags,generatePath);
+        const content = await getContent(serverUrl);
+        const typeNames = [];
+        generateTypeContent(content.definitions,generatePath,typeNames);
+        generateApiContent(content.paths, content.tags, generatePath, typeNames, requestImportExpression);
         console.info(chalk`{white.bold 😍 Generated Successfully}`)
     } catch (e) {
       console.error(chalk`{red.bold ❌ Error: ${e.message}}`);
