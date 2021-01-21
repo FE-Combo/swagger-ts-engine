@@ -11,6 +11,7 @@
 - serverUrl: swagger json 地址
 - servicePath: 生成 service 与 type 的文件路径
 - requestImportExpression: request 导入模板
+- disableEslintHeader?: eslint-disable 头部
 
 ## 使用
 

@@ -114,12 +114,14 @@ function createApiStructure(paths){
     return result;
 }
 
-function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImportExpression){
+function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImportExpression,disableEslintHeader){
     const apis = createApiStructure(paths);
     const tags = Object.keys(apis)
     tags.forEach(tag=>{
         const lines = [];
-        lines.push(`import {${typeNames.join(",")}} from "./type.ts";`)
+        lines.push(disableEslintHeader)
+        lines.push(``)
+        lines.push(`import {${typeNames.join(",")}} from "./type";`)
         lines.push(requestImportExpression);
         lines.push(``);
         const serviceName = `${initialUpperCase(tag)}Service`
@@ -151,9 +153,11 @@ function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImp
     })
 }
 
-function generateTypeContent(definitions,generatePath,typeNames){
+function generateTypeContent(definitions,generatePath,typeNames,disableEslintHeader){
     const lines = [];
     const types = Object.keys(definitions)
+    lines.push(disableEslintHeader)
+    lines.push(``)
     types.forEach(type=>{
         typeNames.push(type)
         const definition = definitions[type];
@@ -168,7 +172,7 @@ function generateTypeContent(definitions,generatePath,typeNames){
 
 async function generate(options) {
     try {
-        const {serverUrl,servicePath,requestImportExpression} = options
+        const {serverUrl,servicePath,requestImportExpression,disableEslintHeader=""} = options
         if(!serverUrl) {
             throw new Error('Missing [serverUrl]');
         }
@@ -184,8 +188,8 @@ async function generate(options) {
         
         const content = await getContent(serverUrl);
         const typeNames = [];
-        generateTypeContent(content.definitions,generatePath,typeNames);
-        generateApiContent(content.paths, content.tags, generatePath, typeNames, requestImportExpression);
+        generateTypeContent(content.definitions,generatePath,typeNames,disableEslintHeader);
+        generateApiContent(content.paths, content.tags, generatePath, typeNames, requestImportExpression,disableEslintHeader);
         console.info(chalk`{white.bold 😍 Generated Successfully}`)
     } catch (e) {
       console.error(chalk`{red.bold ❌ Error: ${e.message}}`);
