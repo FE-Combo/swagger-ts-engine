@@ -142,7 +142,7 @@ function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImp
                 return preValue
             },[]);
             lines.push(`public static ${apiInfo.name}(${requestKey.filter(_=>_).map(_=>`${_.keyWithType}${defaultValue(_.type,_.default)}`)}): Promise<${apiInfo.responseType}> {`)
-            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}",${requestKey.map(_=>_?_.key:"null").join(",")});`)
+            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}",${requestKey.map(_=>_?`${_.in==="body"?_.key:`{${_.key}}`}` :"null").join(",")});`)
             lines.push(`}`);
         });
         lines.push(`}`);
