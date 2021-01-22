@@ -49,7 +49,7 @@ export interface ${code} {
 ${Object.keys(properties.properties).map(filed=>{
     return checkType(properties.properties[filed],filed)
 }).join("\n")}
-}`:`${properties.additionalProperties?"{[key:string]:"+checkType(properties.additionalProperties)+"}":""}`     
+}`:`${properties.additionalProperties?"Record<string, "+ checkType(properties.additionalProperties)+">":""}`     
         }
     } else if(properties.$ref){
         return `${prefix}${properties.$ref.replace("#/definitions/","")}`
@@ -88,12 +88,12 @@ function createApiStructure(paths){
                 })
                 return preValue
             },[])
-            const bodyInfo = parameters.find(_=>_.in==="body")
-            const queryInfo = parameters.find(_=>_.in==="query")
-            const pathInfo = parameters.find(_=>_.in==="path")
-            const headerInfo = parameters.find(_=>_.in==="header")
-            const formDataInfo = parameters.find(_=>_.in==="formData")
-            const response = currentMethodApi.responses && currentMethodApi.responses[200]
+            const bodyInfo = parameters.find(_=>_.in==="body");
+            const queryArray = parameters.map(_=>_.in==="query"?_:null).filter(_=>_);
+            const pathArray = parameters.map(_=>_.in==="path"?_:null).filter(_=>_);
+            const headerArray = parameters.map(_=>_.in==="header"?_:null).filter(_=>_);
+            const formDataArray = parameters.map(_=>_.in==="formData"?_:null).filter(_=>_);
+            const response = currentMethodApi.responses && currentMethodApi.responses[200];
             preInfo[tag].push({
                 name: currentMethodApi.operationId,
                 summary:currentMethodApi.summary,
@@ -101,10 +101,10 @@ function createApiStructure(paths){
                 api,
                 method,
                 body:bodyInfo,
-                query:queryInfo,
-                path:pathInfo,
-                header:headerInfo,
-                formData:formDataInfo,
+                query:queryArray,
+                path:pathArray,
+                header:headerArray,
+                formData:formDataArray,
                 responseType: response&&response.schema? checkType(response.schema):"void"
             })
             return preInfo
@@ -139,12 +139,38 @@ function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImp
             }
             const filterKey = ["path", "query", "body", "header","formData"];
             const requestKey =  filterKey.reduce((preValue,key)=>{
-
                 preValue.push(apiInfo[key]||null)
                 return preValue
             },[]);
-            lines.push(`public static ${apiInfo.name}(${requestKey.filter(_=>_).map(_=>`${_.keyWithType}${defaultValue(_.type,_.default)}`)}): Promise<${apiInfo.responseType}> {`)
-            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}",${requestKey.map(_=>_?`${_.in==="body"?_.key:`{${_.key}}`}` :"null").join(",")});`)
+
+            const requestBody = (params)=>{
+                return params.filter(_=>_).map(_=>{
+                    if(_.constructor ===Array){
+                        return requestBody(_)
+                    } else {
+                        return `${_.keyWithType}${defaultValue(_.type,_.default)}`
+                    }
+                }).filter(_=>_).join(",")
+            }
+
+            const realRequestBody = ()=>{
+                return requestKey.map(_=>{
+                    if(_){
+                        if(_.constructor===Array && _.length > 0){
+                            return `{${_.reduce((preValue,currentValue)=>{
+                                preValue.push(currentValue.key)
+                                return preValue
+                            },[]).join(",")}}`
+                        } else if(_.constructor===Object && _.in==="body") {
+                            return _.key
+                        }
+                    }
+                    return "null"
+                }).join(",")
+            }
+
+            lines.push(`public static ${apiInfo.name}(${requestBody(requestKey)}): Promise<${apiInfo.responseType}> {`)
+            lines.push(`return request("${apiInfo.method.toUpperCase()}","${apiInfo.api}",${realRequestBody()});`)
             lines.push(`}`);
         });
         lines.push(`}`);
