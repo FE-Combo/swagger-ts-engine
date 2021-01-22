@@ -114,17 +114,19 @@ function createApiStructure(paths){
     return result;
 }
 
-function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImportExpression,disableEslintHeader){
+function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImportExpression,additionalPageHeader){
     const apis = createApiStructure(paths);
     const tags = Object.keys(apis)
+    const serviceNames = [];
     tags.forEach(tag=>{
         const lines = [];
-        lines.push(disableEslintHeader)
+        lines.push(additionalPageHeader)
         lines.push(``)
         lines.push(`import {${typeNames.join(",")}} from "./type";`)
         lines.push(requestImportExpression);
         lines.push(``);
-        const serviceName = `${initialUpperCase(tag)}Service`
+        const serviceName = `${initialUpperCase(tag)}Service`;
+        serviceNames.push(serviceName)
         const tagInfo = tagsInfo.find(_=>_&&_.name===tag)
         if(tagInfo&&tagInfo.description){
             lines.push(`// ${tagInfo.description}`)
@@ -151,12 +153,18 @@ function generateApiContent(paths, tagsInfo, generatePath, typeNames, requestImp
         fs.writeFileSync(targetPath, lines.join("\n"));
         console.info(chalk`{white.green Write:} ${targetPath}`);
     })
+
+    const indexPath = path.join(generatePath,`index.ts`);
+    fs.ensureFileSync(indexPath);
+    fs.writeFileSync(indexPath,serviceNames.map(_=>`export {${_}} from "./${_}";`).join("\n") );
+    console.info(chalk`{white.green Write:} ${indexPath}`);
+
 }
 
-function generateTypeContent(definitions,generatePath,typeNames,disableEslintHeader){
+function generateTypeContent(definitions,generatePath,typeNames,additionalPageHeader){
     const lines = [];
     const types = Object.keys(definitions)
-    lines.push(disableEslintHeader)
+    lines.push(additionalPageHeader)
     lines.push(``)
     types.forEach(type=>{
         typeNames.push(type)
@@ -172,7 +180,7 @@ function generateTypeContent(definitions,generatePath,typeNames,disableEslintHea
 
 async function generate(options) {
     try {
-        const {serverUrl,servicePath,requestImportExpression,disableEslintHeader=""} = options
+        const {serverUrl,servicePath,requestImportExpression,additionalPageHeader=""} = options
         if(!serverUrl) {
             throw new Error('Missing [serverUrl]');
         }
@@ -188,8 +196,8 @@ async function generate(options) {
         
         const content = await getContent(serverUrl);
         const typeNames = [];
-        generateTypeContent(content.definitions,generatePath,typeNames,disableEslintHeader);
-        generateApiContent(content.paths, content.tags, generatePath, typeNames, requestImportExpression,disableEslintHeader);
+        generateTypeContent(content.definitions,generatePath,typeNames,additionalPageHeader);
+        generateApiContent(content.paths, content.tags, generatePath, typeNames, requestImportExpression,additionalPageHeader);
         console.info(chalk`{white.bold 😍 Generated Successfully}`)
     } catch (e) {
       console.error(chalk`{red.bold ❌ Error: ${e.message}}`);
