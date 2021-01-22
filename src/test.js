@@ -1,14 +1,14 @@
-const generate = require("./index")
+const generate = require("./index");
 
 generate({
-    serverUrl:"https://petstore.swagger.io/v2/swagger.json",
-    servicePath:"/output",
-    requestImportExpression: "import { request } from '@/utils/fetch';",
-    additionalPageHeader: `
+  serverUrl: "https://petstore.swagger.io/v2/swagger.json",
+  servicePath: "/output",
+  requestImportExpression: "import { request } from '@/utils/fetch';",
+  additionalPageHeader: `
 /* eslint-disable @typescript-eslint/array-type */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
-`
+`,
 });

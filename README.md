@@ -6,8 +6,8 @@
 
 ## 约定
 
-- 生成的所有 Service 都是通过 request 去调用
-- request 参数排序：method, api, path, query, body, header, formData
+- 生成的所有 Service 都是通过 request 调用
+- request 参数: method, api, path, query, body, header, formData
 - serverUrl: swagger json 地址
 - servicePath: 生成 service 与 type 的文件路径
 - requestImportExpression: request 导入模板
