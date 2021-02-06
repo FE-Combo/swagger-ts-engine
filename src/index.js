@@ -197,10 +197,10 @@ function generateApiContent(
     const lines = [];
     lines.push(additionalPageHeader);
     lines.push(``);
-    lines.push(`import {${typeNames.join(",")}} from "./type";`);
+    lines.push(`import {${typeNames.map(_=> _.replace(/\<.*\>/g,"")).join(",")}} from "./type";`);
     lines.push(requestImportExpression);
     lines.push(``);
-    const serviceName = `${initialUpperCase(tag)}Service`;
+    const serviceName = `${initialUpperCase(tag)}Service`.replace(/\-/g,"");
     serviceNames.push(serviceName);
     const tagInfo = tagsInfo.find((_) => _ && _.name === tag);
     if (tagInfo && tagInfo.description) {
@@ -217,11 +217,11 @@ function generateApiContent(
         preValue.push(apiInfo[key] || null);
         return preValue;
       }, []);
-
+      const responseType = apiInfo.responseType.replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
       lines.push(
         `public static ${apiInfo.name}(${parameterDefinition(
           requestKey
-        )}): Promise<${apiInfo.responseType}> {`
+        )}): Promise<${responseType}> {`
       );
       lines.push(
         `return request("${apiInfo.method.toUpperCase()}","${
@@ -252,14 +252,34 @@ function generateTypeContent(
   typeNames,
   additionalPageHeader
 ) {
+  const genericRegex = /(?<=\«)\S+(?=\»)/g;
   const lines = [];
   const types = Object.keys(definitions);
   lines.push(additionalPageHeader);
   lines.push(``);
   types.forEach((type) => {
-    typeNames.push(type);
+    const generic = type.match(genericRegex);
     const definition = definitions[type];
-    lines.push(checkType(definition, type));
+    if(generic) {
+      const subGenerics = generic[0].split(",");
+      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}`)}>`;
+      if(!typeNames.includes(baseType)) {
+        typeNames.push(baseType);
+        let result = checkType(definition, baseType);
+        subGenerics.forEach((_,index)=>{
+          if(/(?<=^List\«)\S+(?=\»)/g.test(_)){
+            // Check if Array
+            result = result.replace(`Array<${genericRegex.exec(_)}>`,`T${index}`)
+          } else {
+            result = result.replace(_,`T${index}`)
+          }
+        })
+        lines.push(result);
+      }
+    } else {
+      typeNames.push(type);
+      lines.push(checkType(definition, type));
+    }
   });
   const targetPath = path.join(generatePath, `type.ts`);
   fs.ensureFileSync(targetPath);

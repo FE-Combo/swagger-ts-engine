@@ -1,0 +1,1089 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "Api Documentation",
+      "version": "1.0",
+      "title": "Api Documentation",
+      "termsOfService": "urn:tos",
+      "contact": {},
+      "license": { "name": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0" }
+    },
+    "host": "10.6.101.104:8080",
+    "basePath": "/",
+    "tags": [
+      { "name": "company-controller", "description": "Company Controller" },
+      { "name": "greeting-controller", "description": "Greeting Controller" },
+      { "name": "project-controller", "description": "Project Controller" },
+      { "name": "role-controller", "description": "Role Controller" },
+      { "name": "sys-user-controller", "description": "Sys User Controller" }
+    ],
+    "paths": {
+      "/company/create": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "create",
+          "operationId": "createUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyCode",
+              "in": "query",
+              "description": "公司社会统一编码",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "companyName",
+              "in": "query",
+              "description": "公司名称",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "parentId",
+              "in": "query",
+              "description": "父级公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«CompanyVo»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/del": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "del",
+          "operationId": "delUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«CompanyVo»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/findAllCompany": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "公司下拉列表-用于搜索条件-账号添加所属公司",
+          "operationId": "findAllCompanyUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyName",
+              "in": "query",
+              "description": "公司名称",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«CompanyVo»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/findAllSubCompany": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "findAllSubCompany",
+          "operationId": "findAllSubCompanyUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«CompanyVo»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/findByCompanyName": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "findByCompanyNameInLevel",
+          "operationId": "findByCompanyNameInLevelUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyName",
+              "in": "query",
+              "description": "公司名称模糊字段",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "parentId",
+              "in": "query",
+              "description": "父级公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«CompanyVo»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/findOne": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "findOne",
+          "operationId": "findOneUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«CompanyVo»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/findTopLevelCompany": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "topLevelCompany",
+          "operationId": "topLevelCompanyUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«CompanyVo»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/page": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "page",
+          "operationId": "pageUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyCode",
+              "in": "query",
+              "description": "公司社会统一编码",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "description": "第几页",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "description": "每页条数",
+              "required": false,
+              "type": "integer",
+              "default": 20,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 20
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK", "schema": { "$ref": "#/definitions/BaseResult«PageVo»" } },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/company/update": {
+        "post": {
+          "tags": ["company-controller"],
+          "summary": "update",
+          "operationId": "updateUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyCode",
+              "in": "query",
+              "description": "公司社会统一编码",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "companyName",
+              "in": "query",
+              "description": "公司名称",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«CompanyVo»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/demo/greeting": {
+        "get": {
+          "tags": ["greeting-controller"],
+          "summary": "greeting",
+          "operationId": "greetingUsingGET",
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "参数名",
+              "in": "query",
+              "description": "name",
+              "required": false,
+              "type": "string",
+              "default": "World",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK", "schema": { "type": "string" } },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/project/findAllProject": {
+        "post": {
+          "tags": ["project-controller"],
+          "summary": "项目下拉列表-用于搜索条件",
+          "operationId": "findAllProjectUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "projectName",
+              "in": "query",
+              "description": "公司名称",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«ProjectVo»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/role/list": {
+        "post": {
+          "tags": ["role-controller"],
+          "summary": "角色下拉列表-用于搜索条件",
+          "operationId": "listUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "roleName",
+              "in": "query",
+              "description": "角色名称",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": { "$ref": "#/definitions/BaseResult«List«RoleVO»»" }
+            },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/create": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "账号管理-添加账号",
+          "operationId": "createUsingPOST_1",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyIds",
+              "in": "query",
+              "description": "所选公司列表",
+              "required": false,
+              "type": "string",
+              "default": "0",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "phone",
+              "in": "query",
+              "description": "账号手机号",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "projectIds",
+              "in": "query",
+              "description": "所选项目列表",
+              "required": false,
+              "type": "string",
+              "default": "0",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "roleDesc",
+              "in": "query",
+              "description": "备注",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "roleId",
+              "in": "query",
+              "description": "角色ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "userName",
+              "in": "query",
+              "description": "用户姓名",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/del": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "del",
+          "operationId": "delUsingPOST_1",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "userId",
+              "in": "query",
+              "description": "用户ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/disable": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "disable",
+          "operationId": "disableUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "userId",
+              "in": "query",
+              "description": "用户ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/findCompanyProjectTree": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "账号管理-添加账号-输入公司名字搜索项目树",
+          "operationId": "findCompanyProjectTreeUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/findExcludeCompanyProjectTree": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "findExcludeCompanyProjectTree",
+          "operationId": "findExcludeCompanyProjectTreeUsingPOST",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyId",
+              "in": "query",
+              "description": "公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "excludeCompanyId",
+              "in": "query",
+              "description": "排除的公司ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "projectId",
+              "in": "query",
+              "description": "项目ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/findOne": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "findOne",
+          "operationId": "findOneUsingPOST_1",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "userId",
+              "in": "query",
+              "description": "账号ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/page": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "page",
+          "operationId": "pageUsingPOST_1",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "description": "第几页",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "phone",
+              "in": "query",
+              "description": "账号手机号",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "roleId",
+              "in": "query",
+              "description": "角色ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "description": "每页条数",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 20
+            },
+            {
+              "name": "userName",
+              "in": "query",
+              "description": "用户姓名",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      },
+      "/sysUser/update": {
+        "post": {
+          "tags": ["sys-user-controller"],
+          "summary": "update",
+          "operationId": "updateUsingPOST_1",
+          "consumes": ["application/json"],
+          "produces": ["*/*"],
+          "parameters": [
+            {
+              "name": "accessToken",
+              "in": "header",
+              "description": "访问令牌",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "companyIds",
+              "in": "query",
+              "description": "所选公司列表",
+              "required": false,
+              "type": "string",
+              "default": "0",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "phone",
+              "in": "query",
+              "description": "账号手机号",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "projectIds",
+              "in": "query",
+              "description": "所选项目列表",
+              "required": false,
+              "type": "string",
+              "default": "0",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "roleDesc",
+              "in": "query",
+              "description": "备注",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            },
+            {
+              "name": "roleId",
+              "in": "query",
+              "description": "角色ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "userId",
+              "in": "query",
+              "description": "用户ID",
+              "required": false,
+              "type": "integer",
+              "default": 0,
+              "format": "int32",
+              "allowEmptyValue": false,
+              "x-example": 0
+            },
+            {
+              "name": "userName",
+              "in": "query",
+              "description": "用户姓名",
+              "required": false,
+              "type": "string",
+              "allowEmptyValue": false
+            }
+          ],
+          "responses": {
+            "200": { "description": "OK" },
+            "201": { "description": "Created" },
+            "401": { "description": "Unauthorized" },
+            "403": { "description": "Forbidden" },
+            "404": { "description": "Not Found" }
+          },
+          "deprecated": false
+        }
+      }
+    },
+    "definitions": {
+      "BaseResult«List«CompanyVo»»": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "结果码" },
+          "data": {
+            "type": "array",
+            "description": "返回数据",
+            "items": { "$ref": "#/definitions/CompanyVo" }
+          },
+          "message": { "type": "string", "description": "提示信息" }
+        },
+        "title": "BaseResult«List«CompanyVo»»"
+      },
+      "BaseResult«CompanyVo»": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "结果码" },
+          "data": { "description": "返回数据", "$ref": "#/definitions/CompanyVo" },
+          "message": { "type": "string", "description": "提示信息" }
+        },
+        "title": "BaseResult«CompanyVo»"
+      },
+      "BaseResult«List«ProjectVo»»": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "结果码" },
+          "data": {
+            "type": "array",
+            "description": "返回数据",
+            "items": { "$ref": "#/definitions/ProjectVo" }
+          },
+          "message": { "type": "string", "description": "提示信息" }
+        },
+        "title": "BaseResult«List«ProjectVo»»"
+      },
+      "BaseResult«List«RoleVO»»": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "结果码" },
+          "data": {
+            "type": "array",
+            "description": "返回数据",
+            "items": { "$ref": "#/definitions/RoleVO" }
+          },
+          "message": { "type": "string", "description": "提示信息" }
+        },
+        "title": "BaseResult«List«RoleVO»»"
+      },
+      "BaseResult«PageVo»": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "description": "结果码" },
+          "data": { "description": "返回数据", "$ref": "#/definitions/PageVo" },
+          "message": { "type": "string", "description": "提示信息" }
+        },
+        "title": "BaseResult«PageVo»"
+      },
+      "CompanyVo": {
+        "type": "object",
+        "properties": {
+          "companyCode": { "type": "string" },
+          "companyId": { "type": "integer", "format": "int32" },
+          "companyName": { "type": "string" },
+          "parentCompanyName": { "type": "string" },
+          "parentId": { "type": "integer", "format": "int32" }
+        },
+        "title": "CompanyVo"
+      },
+      "PageVo": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
+          "total": { "type": "integer", "format": "int64" }
+        },
+        "title": "PageVo"
+      },
+      "ProjectVo": {
+        "type": "object",
+        "properties": {
+          "projectId": { "type": "integer", "format": "int32" },
+          "projectName": { "type": "string" }
+        },
+        "title": "ProjectVo"
+      },
+      "RoleVO": {
+        "type": "object",
+        "properties": {
+          "roleId": { "type": "integer", "format": "int32" },
+          "roleName": { "type": "string" }
+        },
+        "title": "RoleVO"
+      }
+    }
+  }
+  

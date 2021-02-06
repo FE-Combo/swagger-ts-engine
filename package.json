@@ -1,6 +1,6 @@
 {
   "name": "swagger-ts-engine",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Automatically generate service&type based on swagger",
   "main": "src/index.js",
   "scripts": {

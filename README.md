@@ -12,6 +12,7 @@
 - servicePath: 生成 service 与 type 的文件路径
 - requestImportExpression: request 导入模板
 - additionalPageHeader?: 页面头部信息
+- 后端泛型禁止是用 T\[number\]，比如 T0,T1,T3
 
 ## 使用
 
@@ -37,6 +38,3 @@ generate({
 
 - 枚举定义类型
 - 泛型定义
-- 多个 path 变量使用
-- 多个 query 变量使用
-- 多个 header 变量使用
