@@ -11,158 +11,13 @@
   "host": "10.6.101.104:8080",
   "basePath": "/ocm",
   "tags": [
-    { "name": "CompanyController", "description": "Company Controller" },
-    { "name": "GreetingController", "description": "Greeting Controller" },
-    { "name": "ProjectController", "description": "Project Controller" },
-    { "name": "SysUserController", "description": "Sys User Controller" },
-    { "name": "UserController", "description": "User Controller" },
-    { "name": "operation-handler", "description": "Operation Handler" },
-    { "name": "web-mvc-links-handler", "description": "Web Mvc Links Handler" },
-    { "name": "权限管理-角色管理", "description": "Role Controller" }
+    { "name": "CompanyController", "description": "公司管理" },
+    { "name": "ProjectController", "description": "项目管理" },
+    { "name": "RoleController", "description": "角色管理" },
+    { "name": "SysUserController", "description": "账号管理" },
+    { "name": "UserController", "description": "账号管理-登出修改密码" }
   ],
   "paths": {
-    "/actuator": {
-      "get": {
-        "tags": ["web-mvc-links-handler"],
-        "summary": "links",
-        "operationId": "linksUsingGET",
-        "produces": [
-          "application/vnd.spring-boot.actuator.v3+json",
-          "application/json",
-          "application/vnd.spring-boot.actuator.v2+json"
-        ],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "additionalProperties": { "$ref": "#/definitions/Link" }
-              }
-            }
-          },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Not Found" }
-        },
-        "deprecated": false
-      }
-    },
-    "/actuator/health": {
-      "get": {
-        "tags": ["operation-handler"],
-        "summary": "handle",
-        "operationId": "handleUsingGET_1",
-        "produces": [
-          "application/vnd.spring-boot.actuator.v3+json",
-          "application/json",
-          "application/vnd.spring-boot.actuator.v2+json"
-        ],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "body",
-            "required": false,
-            "schema": { "type": "object", "additionalProperties": { "type": "string" } }
-          }
-        ],
-        "responses": {
-          "200": { "description": "OK", "schema": { "type": "object" } },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Not Found" }
-        },
-        "deprecated": false
-      }
-    },
-    "/actuator/health/**": {
-      "get": {
-        "tags": ["operation-handler"],
-        "summary": "handle",
-        "operationId": "handleUsingGET",
-        "produces": [
-          "application/vnd.spring-boot.actuator.v3+json",
-          "application/json",
-          "application/vnd.spring-boot.actuator.v2+json"
-        ],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "body",
-            "required": false,
-            "schema": { "type": "object", "additionalProperties": { "type": "string" } }
-          }
-        ],
-        "responses": {
-          "200": { "description": "OK", "schema": { "type": "object" } },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Not Found" }
-        },
-        "deprecated": false
-      }
-    },
-    "/actuator/info": {
-      "get": {
-        "tags": ["operation-handler"],
-        "summary": "handle",
-        "operationId": "handleUsingGET_2",
-        "produces": [
-          "application/vnd.spring-boot.actuator.v3+json",
-          "application/json",
-          "application/vnd.spring-boot.actuator.v2+json"
-        ],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "body",
-            "required": false,
-            "schema": { "type": "object", "additionalProperties": { "type": "string" } }
-          }
-        ],
-        "responses": {
-          "200": { "description": "OK", "schema": { "type": "object" } },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Not Found" }
-        },
-        "deprecated": false
-      }
-    },
     "/company/create": {
       "post": {
         "tags": ["CompanyController"],
@@ -577,39 +432,6 @@
             "schema": { "$ref": "#/definitions/BaseResult«CompanyVo»" }
           },
           "201": { "description": "Created" },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Not Found" }
-        },
-        "deprecated": false
-      }
-    },
-    "/demo/greeting": {
-      "get": {
-        "tags": ["GreetingController"],
-        "summary": "greeting",
-        "operationId": "greetingUsingGET",
-        "produces": ["*/*"],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "参数名",
-            "in": "query",
-            "description": "name",
-            "required": false,
-            "type": "string",
-            "default": "World",
-            "allowEmptyValue": false
-          }
-        ],
-        "responses": {
-          "200": { "description": "OK", "schema": { "type": "string" } },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden" },
           "404": { "description": "Not Found" }
@@ -1308,9 +1130,9 @@
         "deprecated": false
       }
     },
-    "/v1.0/role/create": {
+    "/v1.0/role": {
       "post": {
-        "tags": ["权限管理-角色管理"],
+        "tags": ["RoleController"],
         "summary": "角色创建(泽贤)",
         "operationId": "createUsingPOST_1",
         "consumes": ["application/json"],
@@ -1344,40 +1166,9 @@
         "deprecated": false
       }
     },
-    "/v1.0/role/del": {
-      "delete": {
-        "tags": ["权限管理-角色管理"],
-        "summary": "角色删除(泽贤)",
-        "operationId": "removeUsingDELETE",
-        "produces": ["*/*"],
-        "parameters": [
-          {
-            "name": "accessToken",
-            "in": "header",
-            "description": "访问令牌",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "qo",
-            "description": "qo",
-            "required": true,
-            "schema": { "$ref": "#/definitions/RemoveQo" }
-          }
-        ],
-        "responses": {
-          "200": { "description": "OK", "schema": { "$ref": "#/definitions/BaseResult" } },
-          "204": { "description": "No Content" },
-          "401": { "description": "Unauthorized" },
-          "403": { "description": "Forbidden" }
-        },
-        "deprecated": false
-      }
-    },
-    "/v1.0/role/findOne": {
+    "/v1.0/role-menus/{roleId}": {
       "get": {
-        "tags": ["权限管理-角色管理"],
+        "tags": ["RoleController"],
         "summary": "角色菜单权限获取(泽贤)",
         "operationId": "getMenusUsingGET",
         "produces": ["*/*"],
@@ -1391,15 +1182,18 @@
           },
           {
             "name": "roleId",
-            "in": "query",
-            "description": "角色Id",
+            "in": "path",
+            "description": "roleId",
             "required": true,
             "type": "integer",
             "format": "int32"
           }
         ],
         "responses": {
-          "200": { "description": "OK", "schema": { "$ref": "#/definitions/BaseResult" } },
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/BaseResult«RoleMenusVo»" }
+          },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden" },
           "404": { "description": "Not Found" }
@@ -1409,7 +1203,7 @@
     },
     "/v1.0/role/list": {
       "post": {
-        "tags": ["权限管理-角色管理"],
+        "tags": ["RoleController"],
         "summary": "角色下拉列表-用于搜索条件(方祥)",
         "operationId": "listUsingPOST",
         "consumes": ["application/json"],
@@ -1446,7 +1240,7 @@
     },
     "/v1.0/role/page": {
       "get": {
-        "tags": ["权限管理-角色管理"],
+        "tags": ["RoleController"],
         "summary": "角色分页查询(泽贤)",
         "operationId": "pageUsingGET",
         "produces": ["*/*"],
@@ -1461,12 +1255,20 @@
           {
             "name": "page",
             "in": "query",
+            "description": "页码",
             "required": false,
             "type": "integer",
             "format": "int32"
           },
           { "name": "roleName", "in": "query", "required": false, "type": "string" },
-          { "name": "size", "in": "query", "required": false, "type": "integer", "format": "int32" }
+          {
+            "name": "size",
+            "in": "query",
+            "description": "分页大小",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
         ],
         "responses": {
           "200": {
@@ -1480,9 +1282,9 @@
         "deprecated": false
       }
     },
-    "/v1.0/role/update": {
+    "/v1.0/role/{roleId}": {
       "put": {
-        "tags": ["权限管理-角色管理"],
+        "tags": ["RoleController"],
         "summary": "角色修改-提交修改信息(泽贤)",
         "operationId": "updateUsingPUT",
         "consumes": ["application/json"],
@@ -1501,6 +1303,14 @@
             "description": "qo",
             "required": true,
             "schema": { "$ref": "#/definitions/UpdateRoleQo" }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "description": "roleId",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "responses": {
@@ -1514,19 +1324,40 @@
           "404": { "description": "Not Found" }
         },
         "deprecated": false
+      },
+      "delete": {
+        "tags": ["RoleController"],
+        "summary": "角色删除(泽贤)",
+        "operationId": "removeUsingDELETE",
+        "produces": ["*/*"],
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "header",
+            "description": "访问令牌",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "description": "roleId",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK", "schema": { "$ref": "#/definitions/BaseResult«object»" } },
+          "204": { "description": "No Content" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" }
+        },
+        "deprecated": false
       }
     }
   },
   "definitions": {
-    "BaseResult": {
-      "type": "object",
-      "properties": {
-        "code": { "type": "string", "description": "结果码" },
-        "data": { "type": "object", "description": "返回数据" },
-        "message": { "type": "string", "description": "提示信息" }
-      },
-      "title": "BaseResult"
-    },
     "BaseResult«CompanyVo»": {
       "type": "object",
       "properties": {
@@ -1606,6 +1437,15 @@
       },
       "title": "BaseResult«PageVo»"
     },
+    "BaseResult«RoleMenusVo»": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "结果码" },
+        "data": { "description": "返回数据", "$ref": "#/definitions/RoleMenusVo" },
+        "message": { "type": "string", "description": "提示信息" }
+      },
+      "title": "BaseResult«RoleMenusVo»"
+    },
     "BaseResult«RolePageVO»": {
       "type": "object",
       "properties": {
@@ -1632,6 +1472,15 @@
       },
       "title": "BaseResult«Void»"
     },
+    "BaseResult«object»": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "结果码" },
+        "data": { "type": "object", "description": "返回数据" },
+        "message": { "type": "string", "description": "提示信息" }
+      },
+      "title": "BaseResult«object»"
+    },
     "CompanyVo": {
       "type": "object",
       "properties": {
@@ -1645,10 +1494,15 @@
     },
     "CreateRoleQo": {
       "type": "object",
+      "required": ["menuCodes", "roleDesc", "roleName"],
       "properties": {
-        "menuCodes": { "type": "array", "items": { "type": "string" } },
-        "roleDesc": { "type": "string" },
-        "roleName": { "type": "string" }
+        "menuCodes": {
+          "type": "array",
+          "description": "勾选的所有菜单功能的编码组合",
+          "items": { "type": "string" }
+        },
+        "roleDesc": { "type": "string", "description": "角色描述" },
+        "roleName": { "type": "string", "description": "角色名称" }
       },
       "title": "CreateRoleQo"
     },
@@ -1657,15 +1511,24 @@
       "properties": { "roleId": { "type": "integer", "format": "int32" } },
       "title": "CreateRoleVo"
     },
-    "Link": {
+    "MenuEntity": {
       "type": "object",
-      "properties": { "href": { "type": "string" }, "templated": { "type": "boolean" } },
-      "title": "Link"
-    },
-    "Map«string,Link»": {
-      "type": "object",
-      "title": "Map«string,Link»",
-      "additionalProperties": { "$ref": "#/definitions/Link" }
+      "properties": {
+        "children": { "type": "array", "items": { "$ref": "#/definitions/MenuEntity" } },
+        "createdBy": { "type": "integer", "format": "int32" },
+        "createdTime": { "type": "integer", "format": "int64" },
+        "menuCode": { "type": "string" },
+        "menuId": { "type": "integer", "format": "int32" },
+        "menuName": { "type": "string" },
+        "menuType": { "type": "integer", "format": "int32" },
+        "menuUrl": { "type": "string" },
+        "parentCode": { "type": "string" },
+        "sort": { "type": "integer", "format": "int32" },
+        "state": { "type": "integer", "format": "int32" },
+        "updatedBy": { "type": "integer", "format": "int32" },
+        "updatedTime": { "type": "integer", "format": "int64" }
+      },
+      "title": "MenuEntity"
     },
     "MenuVo": {
       "type": "object",
@@ -1696,19 +1559,28 @@
       },
       "title": "ProjectVo"
     },
-    "RemoveQo": {
+    "RoleMenusVo": {
       "type": "object",
-      "properties": { "roleId": { "type": "integer", "format": "int32" } },
-      "title": "RemoveQo"
+      "properties": {
+        "menus": {
+          "type": "array",
+          "description": "菜单集合",
+          "items": { "$ref": "#/definitions/MenuEntity" }
+        },
+        "roleDesc": { "type": "string", "description": "角色描述" },
+        "roleId": { "type": "integer", "format": "int32", "description": "角色Id" },
+        "roleName": { "type": "string", "description": "角色名称" }
+      },
+      "title": "RoleMenusVo"
     },
     "RolePageObj": {
       "type": "object",
       "properties": {
-        "createTime": { "type": "integer", "format": "int64" },
-        "creator": { "type": "string" },
-        "roleDesc": { "type": "string" },
-        "roleId": { "type": "integer", "format": "int32" },
-        "roleName": { "type": "string" }
+        "createTime": { "type": "integer", "format": "int64", "description": "创建时间" },
+        "creator": { "type": "string", "description": "创建人" },
+        "roleDesc": { "type": "string", "description": "角色描述" },
+        "roleId": { "type": "integer", "format": "int32", "description": "角色Id" },
+        "roleName": { "type": "string", "description": "角色名称" }
       },
       "title": "RolePageObj"
     },
@@ -1732,11 +1604,16 @@
     },
     "UpdateRoleQo": {
       "type": "object",
+      "required": ["menuCodes", "roleDesc", "roleName"],
       "properties": {
-        "menuCodes": { "type": "array", "items": { "type": "string" } },
-        "roleDesc": { "type": "string" },
+        "menuCodes": {
+          "type": "array",
+          "description": "勾选的所有菜单功能的编码组合",
+          "items": { "type": "string" }
+        },
+        "roleDesc": { "type": "string", "description": "角色描述" },
         "roleId": { "type": "integer", "format": "int32" },
-        "roleName": { "type": "string" }
+        "roleName": { "type": "string", "description": "角色名称" }
       },
       "title": "UpdateRoleQo"
     },

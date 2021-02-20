@@ -14,7 +14,7 @@ async function getContent(url) {
 
 function initialUpperCase(str) {
   return str.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
-    return $1.toUpperCase() + $2.toLowerCase();
+    return $1.toUpperCase() + $2
   });
 }
 
@@ -107,7 +107,7 @@ ${Object.keys(properties.properties)
                   checkType(properties.additionalProperties) +
                   ">"
                 : ""
-            }`:"object";
+            }`:`${prefix}object`;
     }
   } else if (properties.$ref) {
     return `${prefix}${properties.$ref.replace("#/definitions/", "")}`;
@@ -266,12 +266,12 @@ function generateTypeContent(
     const definition = definitions[type];
     if(generic) {
       const subGenerics = generic[0].split(",");
-      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}=any`)}>`;
+      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}`)}>`;
       if(!typeNames.includes(baseType)) {
         typeNames.push(baseType);
         // Java built-in type
         if(baseType.startsWith("Map<")){
-          lines.push(`export type Map<T0 extends string | number | symbol,T1=any> = Record<T0,T1>`);
+          lines.push(`export type Map<T0 extends string | number | symbol,T1> = Record<T0,T1>`);
         } else {
           let result = checkType(definition, baseType);
           subGenerics.forEach((_,index)=>{

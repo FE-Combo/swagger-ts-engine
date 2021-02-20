@@ -12,7 +12,8 @@
 - servicePath: 生成 service 与 type 的文件路径
 - requestImportExpression: request 导入模板
 - additionalPageHeader?: 页面头部信息
-- T为前端特有泛型, 为避免重复后端禁止使用 T\[number\], e.g: T0,T1,T3
+- T 为前端特有泛型, 为避免重复后端禁止使用 T\[number\], e.g: T0,T1,T3
+- 类型不能重名,e.g: BaseResult, BaseResult\<T\>
 
 ## 使用
 
