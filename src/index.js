@@ -3,6 +3,7 @@ const fs = require("fs-extra");
 const chalk = require("chalk");
 const axios = require("axios");
 const Agent = require("https").Agent;
+const json = require("./index.json")
 
 async function getContent(url) {
   const response = await axios.get(url, {
@@ -15,6 +16,10 @@ function initialUpperCase(str) {
   return str.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
     return $1.toUpperCase() + $2.toLowerCase();
   });
+}
+
+function checkInitialUpperCase(str) {
+ return /^[A-Z]+(.*)$/.test(str)
 }
 
 function parameterDefinition(params) {
@@ -96,13 +101,13 @@ ${Object.keys(properties.properties)
   })
   .join("\n")}
 }`
-          : `${
+          : properties.additionalProperties ? `${prefix}${
               properties.additionalProperties
-                ? "Record<string, " +
+                ? "Record<string | number | symbol, " +
                   checkType(properties.additionalProperties) +
                   ">"
                 : ""
-            }`;
+            }`:"object";
     }
   } else if (properties.$ref) {
     return `${prefix}${properties.$ref.replace("#/definitions/", "")}`;
@@ -130,7 +135,6 @@ function createApiStructure(paths) {
       if (!preInfo[tag]) {
         preInfo[tag] = [];
       }
-
       const parameters = currentMethodApi.parameters.reduce(
         (preValue, currentParameter) => {
           preValue.push({
@@ -197,7 +201,7 @@ function generateApiContent(
     const lines = [];
     lines.push(additionalPageHeader);
     lines.push(``);
-    lines.push(`import {${typeNames.map(_=> _.replace(/\<.*\>/g,"")).join(",")}} from "./type";`);
+    lines.push(`import {${[...new Set(typeNames.map(_=> _.replace(/\<.*\>/g,"")))].join(",")}} from "./type";`);
     lines.push(requestImportExpression);
     lines.push(``);
     const serviceName = `${initialUpperCase(tag)}Service`.replace(/\-/g,"");
@@ -217,7 +221,7 @@ function generateApiContent(
         preValue.push(apiInfo[key] || null);
         return preValue;
       }, []);
-      const responseType = apiInfo.responseType.replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
+      const responseType = apiInfo.responseType.replace(/\«Void\»/g,"<void>").replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
       lines.push(
         `public static ${apiInfo.name}(${parameterDefinition(
           requestKey
@@ -262,19 +266,24 @@ function generateTypeContent(
     const definition = definitions[type];
     if(generic) {
       const subGenerics = generic[0].split(",");
-      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}`)}>`;
+      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}=any`)}>`;
       if(!typeNames.includes(baseType)) {
         typeNames.push(baseType);
-        let result = checkType(definition, baseType);
-        subGenerics.forEach((_,index)=>{
-          if(/(?<=^List\«)\S+(?=\»)/g.test(_)){
-            // Check if Array
-            result = result.replace(`Array<${genericRegex.exec(_)}>`,`T${index}`)
-          } else {
-            result = result.replace(_,`T${index}`)
-          }
-        })
-        lines.push(result);
+        // Java built-in type
+        if(baseType.startsWith("Map<")){
+          lines.push(`export type Map<T0 extends string | number | symbol,T1=any> = Record<T0,T1>`);
+        } else {
+          let result = checkType(definition, baseType);
+          subGenerics.forEach((_,index)=>{
+            if(/(?<=^List\«)\S+(?=\»)/g.test(_)){
+              // Check if Array
+              result = result.replace(`Array<${genericRegex.exec(_)}>`,`T${index}`)
+            } else {
+              result = result.replace(_,`T${index}`)
+            }
+          })
+          lines.push(result);
+        }
       }
     } else {
       typeNames.push(type);
@@ -308,7 +317,7 @@ async function generate(options) {
     console.info(chalk`{white.green Clear directory:} ${generatePath}`);
     fs.emptyDirSync(generatePath);
 
-    const content = await getContent(serverUrl);
+    const content = options.debugger?json:await getContent(serverUrl);
     const typeNames = [];
     generateTypeContent(
       content.definitions,
