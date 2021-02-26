@@ -83,6 +83,8 @@ function checkType(properties, code) {
   const prefix = code ? `${code}${properties.required ? "" : "?"}:` : "";
   if (properties.type) {
     switch (properties.type) {
+      case "number":
+       return `${prefix}number`;
       case "boolean":
         return `${prefix}boolean`;
       case "integer":
@@ -120,7 +122,8 @@ ${Object.keys(properties.properties)
                   checkType(properties.additionalProperties) +
                   ">"
                 : ""
-            }`:`${prefix}object`;
+            }`:`
+${prefix?`export type ${code} = object`:"object"}`;
     }
   } else if (properties.$ref) {
     return `${prefix}${properties.$ref.replace("#/definitions/", "")}`;
@@ -234,7 +237,7 @@ function generateApiContent(
         preValue.push(apiInfo[key] || null);
         return preValue;
       }, []);
-      const responseType = apiInfo.responseType.replace(/\«Void\»/g,"<void>").replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
+      const responseType = apiInfo.responseType.replace(/\«int\»/g,"<number>").replace(/\«Void\»/g,"<void>").replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
       lines.push(
         `public static ${apiInfo.name}(${parameterDefinition(
           requestKey
