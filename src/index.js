@@ -23,7 +23,7 @@ function checkInitialUpperCase(str) {
 }
 
 function parameterDefinition(params) {
-  return params
+  const parameters = params
     .filter((_) => _)
     .map((_) => {
       if (_.constructor === Array) {
@@ -33,7 +33,20 @@ function parameterDefinition(params) {
       }
     })
     .filter((_) => _)
-    .join(",");
+    .join(",").split(",");
+    return parameters.reduce((preValue,currentValue)=>{
+      if(!currentValue.includes("?")){
+        const index = preValue.findIndex(_=>!_.includes("?"));
+        if(index > -1){
+          preValue.splice(index,0,currentValue)
+        } else {
+          preValue.unshift(currentValue)
+        }
+      } else {
+        preValue.push(currentValue)
+      }
+      return preValue
+    },[]).join(",");
 }
 
 function parameterUsage(params) {

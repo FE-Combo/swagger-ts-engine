@@ -1,6 +1,6 @@
 {
   "name": "swagger-ts-engine",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Automatically generate service&type based on swagger",
   "main": "src/index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "chalk": "^4.1.0",
+    "chalk": " 4.1.0",
     "fs-extra": "^9.1.0"
   }
 }
