@@ -80,6 +80,7 @@ function defaultValue(type, value) {
 }
 
 function checkType(properties, code) {
+  // TODO: distinguish type and api
   const prefix = code ? `${code}${properties.required ? "" : "?"}:` : "";
   if (properties.type) {
     switch (properties.type) {
