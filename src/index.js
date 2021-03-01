@@ -204,13 +204,17 @@ function createApiStructure(paths) {
 }
 
 function generateApiContent(
+  options,
   paths,
   tagsInfo,
   generatePath,
-  typeNames,
-  requestImportExpression,
-  additionalPageHeader
+  typeNames
 ) {
+  const {
+    requestImportExpression,
+    additionalPageHeader = "",
+    apiRename,
+  } = options;
   const apis = createApiStructure(paths);
   const tags = Object.keys(apis);
   const serviceNames = [];
@@ -239,8 +243,12 @@ function generateApiContent(
         return preValue;
       }, []);
       const responseType = apiInfo.responseType.replace(/\«int\»/g,"<number>").replace(/\«Void\»/g,"<void>").replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
+      let apiName = apiInfo.name
+      if(typeof apiRename==="function"){
+        apiName = apiRename(apiName) || apiName
+      }
       lines.push(
-        `public static ${apiInfo.name}(${parameterDefinition(
+        `public static ${apiName}(${parameterDefinition(
           requestKey
         )}): Promise<${responseType}> {`
       );
@@ -343,12 +351,11 @@ async function generate(options) {
       additionalPageHeader
     );
     generateApiContent(
+      options,
       content.paths,
       content.tags,
       generatePath,
-      typeNames,
-      requestImportExpression,
-      additionalPageHeader
+      typeNames
     );
     console.info(chalk`{white.bold 😍 Generated Successfully}`);
   } catch (e) {

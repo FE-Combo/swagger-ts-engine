@@ -5,6 +5,9 @@ generate({
   serverUrl: "https://petstore.swagger.io/v2/swagger.json",
   servicePath: "/output",
   requestImportExpression: "import { request } from '@/utils/fetch';",
+  apiRename:(name)=>{
+    return name.replace(/\_\w$/,"")
+  },
   additionalPageHeader: `
 /* eslint-disable @typescript-eslint/array-type */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
@@ -12,4 +15,5 @@ generate({
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 `,
+
 });
