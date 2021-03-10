@@ -123,8 +123,8 @@ ${Object.keys(properties.properties)
                   checkType(properties.additionalProperties) +
                   ">"
                 : ""
-            }`:`
-${prefix?`export type ${code} = object`:"object"}`;
+            }`:properties.title?`
+${prefix?`export type ${code} = object`:"object"}`:`${prefix}object`;
     }
   } else if (properties.$ref) {
     return `${prefix}${properties.$ref.replace("#/definitions/", "")}`;
