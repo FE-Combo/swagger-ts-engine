@@ -19,7 +19,7 @@ function initialUpperCase(str) {
 }
 
 function checkInitialUpperCase(str) {
- return /^[A-Z]+(.*)$/.test(str)
+  return /^[A-Z]+(.*)$/.test(str)
 }
 
 function parameterDefinition(params) {
@@ -34,19 +34,19 @@ function parameterDefinition(params) {
     })
     .filter((_) => _)
     .join(",").split(",");
-    return parameters.reduce((preValue,currentValue)=>{
-      if(!currentValue.includes("?")){
-        const index = preValue.findIndex(_=>!_.includes("?"));
-        if(index > -1){
-          preValue.splice(index,0,currentValue)
-        } else {
-          preValue.unshift(currentValue)
-        }
+  return parameters.reduce((preValue, currentValue) => {
+    if (!currentValue.includes("?")) {
+      const index = preValue.findIndex(_ => !_.includes("?"));
+      if (index > -1) {
+        preValue.splice(index, 0, currentValue)
       } else {
-        preValue.push(currentValue)
+        preValue.unshift(currentValue)
       }
-      return preValue
-    },[]).join(",");
+    } else {
+      preValue.push(currentValue)
+    }
+    return preValue
+  }, []).join(",");
 }
 
 function parameterUsage(params) {
@@ -79,61 +79,100 @@ function defaultValue(type, value) {
   return "";
 }
 
-function checkType(properties, code) {
+function checkType(properties, code, level = 0) {
   // TODO: distinguish type and api
   const prefix = code ? `${code}${properties.required ? "" : "?"}:` : "";
   if (properties.type) {
     switch (properties.type) {
       case "number":
-       return `${prefix}number`;
+        return `${prefix}number`;
       case "boolean":
         return `${prefix}boolean`;
       case "integer":
         return `${prefix}number`;
       case "string":
-        return `${prefix}${
-          properties.enum
-            ? properties.enum.map((_) => `"${_}"`).join("|")
-            : "string"
-        }`;
+        if (level === 0 && properties.enum) {
+          return `export enum ${code} {
+${properties.enum.map((_) => `${_}="${_}"`).join(",\n")}
+  };`
+        }
+
+        return `${prefix}${properties.enum
+          ? properties.enum.map((_) => `"${_}"`).join("|")
+          : "string"
+          }`;
       case "file":
         return `${prefix}File`;
       case "array":
-        return `${
-          properties.items.$ref
-            ? prefix +
-              "Array<" +
-              properties.items.$ref.replace("#/definitions/", "") +
-              ">"
-            : prefix + "Array<" + checkType(properties.items) + ">"
-        }`;
+        return `${properties.items.$ref
+          ? prefix +
+          "Array<" +
+          properties.items.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "") +
+          ">"
+          : prefix + "Array<" + checkType(properties.items, undefined, level + 1) + ">"
+          }`;
       case "object":
+        if (properties.required && properties.required.length > 0 && properties.properties) {
+          properties.required.forEach((requiredField) => {
+            properties.properties[requiredField].required = true;
+          })
+        }
+        if (level > 0) {
+          // TODO
+        }
+
         return properties.properties
           ? `
 export interface ${code} {
 ${Object.keys(properties.properties)
-  .map((filed) => {
-    return checkType(properties.properties[filed], filed);
-  })
-  .join("\n")}
+            .map((filed) => {
+              return checkType(properties.properties[filed], filed, level + 1);
+            })
+            .join("\n")}
 }`
-          : properties.additionalProperties ? `${prefix}${
-              properties.additionalProperties
-                ? "Record<string | number | symbol, " +
-                  checkType(properties.additionalProperties) +
-                  ">"
-                : ""
-            }`:properties.title?`
-${prefix?`export type ${code} = object`:"object"}`:`${prefix}object`;
+          : properties.additionalProperties ? `${prefix}${properties.additionalProperties
+            ? "Record<string | number | symbol, " +
+            checkType(properties.additionalProperties, undefined, level + 1) +
+            ">"
+            : ""
+            }` : properties.title ? `
+${prefix ? `export type ${code} = object` : "object"}` : `${prefix}object`;
     }
   } else if (properties.$ref) {
-    return `${prefix}${properties.$ref.replace("#/definitions/", "")}`;
+    return `${prefix}${properties.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "")}`;
   } else if (properties.schema) {
     if (properties.schema.$ref) {
-      return `${prefix}${properties.schema.$ref.replace("#/definitions/", "")}`;
+      return `${prefix}${properties.schema.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "")}`;
     } else {
-      return checkType(properties.schema, code);
+      return checkType(properties.schema, code, level + 1);
     }
+  } else if (properties.allOf) {
+    const allOfTypes = properties.allOf.map((_) => {
+      if (_.$ref) {
+        return _.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "");
+      } else {
+        return checkType(_, code, level + 1);
+      }
+    });
+    return `${prefix}${allOfTypes.join(" & ")}`;
+  } else if (properties.anyOf) {
+    const anyOfTypes = properties.anyOf.map((_) => {
+      if (_.$ref) {
+        return _.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "");
+      } else {
+        return checkType(_, code, level + 1);
+      }
+    });
+    return `${prefix}${anyOfTypes.join(" | ")}`;
+  } else if (properties.oneOf) {
+    const oneOfTypes = properties.oneOf.map((_) => {
+      if (_.$ref) {
+        return _.$ref.replace("#/definitions/", "").replace("#/components/schemas/", "");
+      } else {
+        return checkType(_, code, level + 1);
+      }
+    });
+    return `${prefix}${oneOfTypes.join(" | ")}`;
   }
   console.info(
     chalk`{red.bold CheckType Omission: ${JSON.stringify(properties)}}`
@@ -152,7 +191,7 @@ function createApiStructure(paths) {
       if (!preInfo[tag]) {
         preInfo[tag] = [];
       }
-      const parameters = currentMethodApi.parameters.reduce(
+      const parameters = (currentMethodApi.parameters ?? []).reduce(
         (preValue, currentParameter) => {
           preValue.push({
             in: currentParameter.in,
@@ -167,7 +206,19 @@ function createApiStructure(paths) {
         },
         []
       );
-      const bodyInfo = parameters.find((_) => _.in === "body");
+
+      const requestBody = currentMethodApi?.requestBody
+
+      const bodyInfo = parameters.find((_) => _.in === "body") ?? (requestBody ? {
+        in: "body",
+        key: "body",
+        required: requestBody.required,
+        keyWithType: checkType({
+          required: requestBody?.required,
+          ...requestBody?.content?.["application/json"]?.schema,
+        }, "body")
+      } : null);
+
       const queryArray = parameters
         .map((_) => (_.in === "query" ? _ : null))
         .filter((_) => _);
@@ -180,8 +231,10 @@ function createApiStructure(paths) {
       const formDataArray = parameters
         .map((_) => (_.in === "formData" ? _ : null))
         .filter((_) => _);
+
       const response =
-        currentMethodApi.responses && currentMethodApi.responses[200];
+        currentMethodApi?.responses?.[200] || currentMethodApi?.responses?.default;
+
       preInfo[tag].push({
         name: currentMethodApi.operationId,
         summary: currentMethodApi.summary,
@@ -194,7 +247,7 @@ function createApiStructure(paths) {
         header: headerArray,
         formData: formDataArray,
         responseType:
-          response && response.schema ? checkType(response.schema) : "void",
+          (response?.content?.["application/json"]?.schema || response?.schema) ? checkType(response?.content?.["application/json"]?.schema || response?.schema) : "void",
       });
       return preInfo;
     }, preValue);
@@ -214,6 +267,7 @@ function generateApiContent(
     requestImportExpression,
     additionalPageHeader = "",
     apiRename,
+    renderResponseType,
   } = options;
   const apis = createApiStructure(paths);
   const tags = Object.keys(apis);
@@ -222,10 +276,10 @@ function generateApiContent(
     const lines = [];
     lines.push(additionalPageHeader);
     lines.push(``);
-    lines.push(`import {${[...new Set(typeNames.map(_=> _.replace(/\<.*\>/g,"")))].join(",")}} from "./type";`);
+    lines.push(`import {${[...new Set(typeNames.map(_ => _.replace(/\<.*\>/g, "")))].join(",")}} from "./type";`);
     lines.push(requestImportExpression);
     lines.push(``);
-    const serviceName = `${initialUpperCase(tag)}Service`.replace(/\-/g,"");
+    const serviceName = `${initialUpperCase(tag)}Service`.replace(/\-/g, "");
     serviceNames.push(serviceName);
     const tagInfo = tagsInfo.find((_) => _ && _.name === tag);
     if (tagInfo && tagInfo.description) {
@@ -242,19 +296,20 @@ function generateApiContent(
         preValue.push(apiInfo[key] || null);
         return preValue;
       }, []);
-      const responseType = apiInfo.responseType.replace(/\«int\»/g,"<number>").replace(/\«Void\»/g,"<void>").replace(/\«List\«/g,"<Array<").replace(/\«/g,"<").replace(/\»/g,">");
+
+      const responseType = apiInfo.responseType.replace(/\«int\»/g, "<number>").replace(/\«Void\»/g, "<void>").replace(/\«List\«/g, "<Array<").replace(/\«/g, "<").replace(/\»/g, ">");
       let apiName = apiInfo.name
-      if(typeof apiRename==="function"){
+      if (typeof apiRename === "function") {
         apiName = apiRename(apiName) || apiName
       }
+
       lines.push(
         `public static ${apiName}(${parameterDefinition(
           requestKey
-        )}): Promise<${responseType}> {`
+        )}): Promise<${typeof renderResponseType === "function" ? renderResponseType(responseType) : responseType}> {`
       );
       lines.push(
-        `return request("${apiInfo.method.toUpperCase()}","${
-          apiInfo.api
+        `return request("${apiInfo.method.toUpperCase()}","${apiInfo.api
         }",${parameterUsage(requestKey)});`
       );
       lines.push(`}`);
@@ -289,22 +344,22 @@ function generateTypeContent(
   types.forEach((type) => {
     const generic = type.match(genericRegex);
     const definition = definitions[type];
-    if(generic) {
+    if (generic) {
       const subGenerics = generic[0].split(",");
-      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_,index)=>`T${index}`)}>`;
-      if(!typeNames.includes(baseType)) {
+      const baseType = `${type.replace(`«${generic[0]}»`, "")}<${subGenerics.map((_, index) => `T${index}`)}>`;
+      if (!typeNames.includes(baseType)) {
         typeNames.push(baseType);
         // Java built-in type
-        if(baseType.startsWith("Map<")){
+        if (baseType.startsWith("Map<")) {
           lines.push(`export type Map<T0 extends string | number | symbol,T1> = Record<T0,T1>`);
         } else {
           let result = checkType(definition, baseType);
-          subGenerics.forEach((_,index)=>{
-            if(/(?<=^List\«)\S+(?=\»)/g.test(_)){
+          subGenerics.forEach((_, index) => {
+            if (/(?<=^List\«)\S+(?=\»)/g.test(_)) {
               // Check if Array
-              result = result.replace(`Array<${genericRegex.exec(_)}>`,`T${index}`)
+              result = result.replace(`Array<${genericRegex.exec(_)}>`, `T${index}`)
             } else {
-              result = result.replace(_,`T${index}`)
+              result = result.replace(_, `T${index}`)
             }
           })
           lines.push(result);
@@ -342,10 +397,11 @@ async function generate(options) {
     console.info(chalk`{white.green Clear directory:} ${generatePath}`);
     fs.emptyDirSync(generatePath);
 
-    const content = options.debugger?json:await getContent(serverUrl);
+    const content = options.debugger ? json : await getContent(serverUrl);
+
     const typeNames = [];
     generateTypeContent(
-      content.definitions,
+      content?.definitions || content?.components?.schemas || {},
       generatePath,
       typeNames,
       additionalPageHeader
